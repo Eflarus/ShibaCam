@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:layout_margin="5dp"
+    android:backgroundTint="@color/purple_200"
+    app:cardCornerRadius="5dp"
+    app:cardElevation="5dp">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:id="@+id/gallery_card_img"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/img"
+            android:minHeight="120dp"
+            android:scaleType="centerCrop"
+            tools:src="@tools:sample/backgrounds/scenic" />
+
+        <ImageView
+            android:id="@+id/is_video_card"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_gravity="top|end"
+            android:layout_marginTop="4dp"
+
+            android:layout_marginEnd="4dp"
+            android:background="@android:color/transparent"
+            android:backgroundTint="@color/transparent"
+            android:contentDescription="@string/img"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_start"
+            android:visibility="invisible" />
+
+    </FrameLayout>
+
+
+</androidx.cardview.widget.CardView>
