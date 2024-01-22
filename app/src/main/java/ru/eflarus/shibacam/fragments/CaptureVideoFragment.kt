@@ -37,10 +37,9 @@ import java.util.*
 
 class CaptureVideoFragment : Fragment() {
 
-    private var _captureViewBinding: FragmentCaptureVideoBinding? = null
-    private val captureViewBinding get() = _captureViewBinding!!
+    private var _binding: FragmentCaptureVideoBinding? = null
+    private val binding get() = _binding!!
     private val captureLiveStatus = MutableLiveData<String>()
-
 
     private val cameraCapabilities = mutableListOf<CameraCapability>()
 
@@ -48,21 +47,132 @@ class CaptureVideoFragment : Fragment() {
     private var currentRecording: Recording? = null
     private lateinit var recordingState: VideoRecordEvent
 
+    private var cameraIndex = 0
+    private var qualityIndex = DEFAULT_QUALITY_IDX
+    private var audioEnabled = true
+
+
+    private var enumerationDeferred: Deferred<Unit>? = null
+
     enum class UiState {
         IDLE,
         RECORDING,
         FINALIZED
     }
 
-    private var cameraIndex = 0
-    private var qualityIndex = DEFAULT_QUALITY_IDX
-    private var audioEnabled = true
-
     private val mainThreadExecutor by lazy { ContextCompat.getMainExecutor(requireContext()) }
-    private var enumerationDeferred: Deferred<Unit>? = null
 
 
-    private suspend fun setupCepture() {
+    companion object {
+        const val DEFAULT_QUALITY_IDX = 0
+        val TAG: String = CaptureVideoFragment::class.java.simpleName
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentCaptureVideoBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        initUI()
+        initCameraFragment()
+    }
+
+    override fun onDestroyView() {
+        _binding = null
+        super.onDestroyView()
+    }
+
+    private fun initUI() {
+        with(binding) {
+            camSwitchBtn.setOnClickListener {
+                switchCamera()
+            }
+
+            switchToPhotoBtn.setOnClickListener {
+                navigateToPhotoFragment()
+            }
+
+            galleryBtn.setOnClickListener {
+                navigateToGalleryFragment()
+            }
+
+            recordButton.setOnClickListener {
+                toggleRecording()
+            }
+
+            stopButton.setOnClickListener {
+                stopRecording()
+            }
+
+            captureLiveStatus.observe(viewLifecycleOwner) {
+                captureStatus.text = it
+            }
+            captureLiveStatus.value = ""
+        }
+    }
+
+    private fun switchCamera() {
+        cameraIndex = (cameraIndex + 1) % cameraCapabilities.size
+        qualityIndex = DEFAULT_QUALITY_IDX
+        enableUI(false)
+        viewLifecycleOwner.lifecycleScope.launch {
+            setupCapture()
+        }
+    }
+
+    private fun navigateToPhotoFragment() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            Navigation.findNavController(requireActivity(), R.id.fragment_container)
+                .navigate(CaptureVideoFragmentDirections.actionCaptureFragmentToCapturePhotoFragment())
+        }
+    }
+
+    private fun navigateToGalleryFragment() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            Navigation.findNavController(requireActivity(), R.id.fragment_container)
+                .navigate(CaptureVideoFragmentDirections.actionCaptureFragmentToGalleryFragment())
+        }
+    }
+
+    private fun toggleRecording() {
+        if (!this::recordingState.isInitialized || recordingState is VideoRecordEvent.Finalize) {
+            enableUI(false)
+            startRecording()
+        } else {
+            when (recordingState) {
+                is VideoRecordEvent.Start -> {
+                    currentRecording?.pause()
+                    binding.stopButton.visibility = View.VISIBLE
+                }
+
+                is VideoRecordEvent.Pause -> currentRecording?.resume()
+                is VideoRecordEvent.Resume -> currentRecording?.pause()
+                else -> throw IllegalStateException("recordingState in unknown state")
+            }
+        }
+    }
+
+
+    private fun stopRecording() {
+        binding.stopButton.visibility = View.INVISIBLE
+        if (currentRecording == null || recordingState is VideoRecordEvent.Finalize) {
+            return
+        }
+
+        val recording = currentRecording
+        if (recording != null) {
+            recording.stop()
+            currentRecording = null
+        }
+        binding.recordButton.setImageResource(R.drawable.ic_start)
+    }
+
+
+    private suspend fun setupCapture() {
         val cameraProvider = ProcessCameraProvider.getInstance(requireContext()).await()
 
         val cameraSelector = getCameraSelector(cameraIndex)
@@ -70,7 +180,7 @@ class CaptureVideoFragment : Fragment() {
         val quality = cameraCapabilities[cameraIndex].qualities[qualityIndex]
         val qualitySelector = QualitySelector.from(quality)
 
-        captureViewBinding.previewView.updateLayoutParams<ConstraintLayout.LayoutParams> {
+        binding.previewView.updateLayoutParams<ConstraintLayout.LayoutParams> {
             val orientation = this@CaptureVideoFragment.resources.configuration.orientation
             dimensionRatio = quality.getAspectRatioString(
                 quality, (orientation == Configuration.ORIENTATION_PORTRAIT)
@@ -86,7 +196,7 @@ class CaptureVideoFragment : Fragment() {
             .setResolutionSelector(resolutionSelector)
             .build()
             .apply {
-                setSurfaceProvider(captureViewBinding.previewView.surfaceProvider)
+                setSurfaceProvider(binding.previewView.surfaceProvider)
             }
 
         val recorder = Recorder.Builder().setQualitySelector(qualitySelector).build()
@@ -124,6 +234,27 @@ class CaptureVideoFragment : Fragment() {
             .start(mainThreadExecutor, captureListener)
     }
 
+    private fun enableUI(enable: Boolean) {
+        val viewsToEnable = arrayOf(
+            binding.camSwitchBtn,
+            binding.recordButton,
+            binding.stopButton,
+            binding.qualitySelection,
+            binding.switchToPhotoBtn,
+            binding.galleryBtn
+        )
+
+        viewsToEnable.forEach {
+            it.isEnabled = enable
+        }
+        if (cameraCapabilities.size <= 1) {
+            binding.camSwitchBtn.isEnabled = false
+        }
+        if (cameraCapabilities[cameraIndex].qualities.size <= 1) {
+            binding.qualitySelection.isEnabled = false
+        }
+    }
+
     private val captureListener = Consumer<VideoRecordEvent> { event ->
         if (event !is VideoRecordEvent.Status) recordingState = event
 
@@ -132,8 +263,6 @@ class CaptureVideoFragment : Fragment() {
         if (event is VideoRecordEvent.Finalize) {
             updateUI(event)
             initCameraFragment()
-
-
         }
     }
 
@@ -203,34 +332,33 @@ class CaptureVideoFragment : Fragment() {
                 enumerationDeferred = null
             }
             initializeQualitySectionsUI()
-
-            setupCepture()
+            setupCapture()
         }
     }
 
 
     private fun initializeUI() {
-        captureViewBinding.camSwitchBtn.apply {
+        binding.camSwitchBtn.apply {
             setOnClickListener {
                 cameraIndex = (cameraIndex + 1) % cameraCapabilities.size
                 qualityIndex = DEFAULT_QUALITY_IDX
                 initializeQualitySectionsUI()
                 enableUI(false)
                 viewLifecycleOwner.lifecycleScope.launch {
-                    setupCepture()
+                    setupCapture()
                 }
             }
             isEnabled = false
         }
 
-        captureViewBinding.switchToPhotoBtn.setOnClickListener {
+        binding.switchToPhotoBtn.setOnClickListener {
             lifecycleScope.launch {
                 Navigation.findNavController(requireActivity(), R.id.fragment_container).navigate(
                     CaptureVideoFragmentDirections.actionCaptureFragmentToCapturePhotoFragment()
                 )
             }
         }
-        captureViewBinding.galleryBtn.setOnClickListener {
+        binding.galleryBtn.setOnClickListener {
             lifecycleScope.launch {
                 Navigation.findNavController(requireActivity(), R.id.fragment_container).navigate(
                     CaptureVideoFragmentDirections.actionCaptureFragmentToGalleryFragment()
@@ -238,8 +366,7 @@ class CaptureVideoFragment : Fragment() {
             }
         }
 
-
-        captureViewBinding.recordButton.apply {
+        binding.recordButton.apply {
             setOnClickListener {
                 if (!this@CaptureVideoFragment::recordingState.isInitialized || recordingState is VideoRecordEvent.Finalize) {
                     enableUI(false)
@@ -248,7 +375,7 @@ class CaptureVideoFragment : Fragment() {
                     when (recordingState) {
                         is VideoRecordEvent.Start -> {
                             currentRecording?.pause()
-                            captureViewBinding.stopButton.visibility = View.VISIBLE
+                            binding.stopButton.visibility = View.VISIBLE
                         }
 
                         is VideoRecordEvent.Pause -> currentRecording?.resume()
@@ -260,9 +387,9 @@ class CaptureVideoFragment : Fragment() {
             isEnabled = false
         }
 
-        captureViewBinding.stopButton.apply {
+        binding.stopButton.apply {
             setOnClickListener {
-                captureViewBinding.stopButton.visibility = View.INVISIBLE
+                binding.stopButton.visibility = View.INVISIBLE
                 if (currentRecording == null || recordingState is VideoRecordEvent.Finalize) {
                     return@setOnClickListener
                 }
@@ -272,19 +399,18 @@ class CaptureVideoFragment : Fragment() {
                     recording.stop()
                     currentRecording = null
                 }
-                captureViewBinding.recordButton.setImageResource(R.drawable.ic_start)
+                binding.recordButton.setImageResource(R.drawable.ic_start)
             }
             visibility = View.INVISIBLE
             isEnabled = false
         }
 
         captureLiveStatus.observe(viewLifecycleOwner) {
-            captureViewBinding.captureStatus.apply {
+            binding.captureStatus.apply {
                 post { text = it }
             }
         }
-        captureLiveStatus.value =""
-//        captureLiveStatus.value = getString(R.string.Idle)
+        captureLiveStatus.value = ""
     }
 
 
@@ -301,11 +427,11 @@ class CaptureVideoFragment : Fragment() {
             }
 
             is VideoRecordEvent.Pause -> {
-                captureViewBinding.recordButton.setImageResource(R.drawable.ic_resume)
+                binding.recordButton.setImageResource(R.drawable.ic_resume)
             }
 
             is VideoRecordEvent.Resume -> {
-                captureViewBinding.recordButton.setImageResource(R.drawable.ic_pause)
+                binding.recordButton.setImageResource(R.drawable.ic_pause)
             }
         }
 
@@ -330,28 +456,8 @@ class CaptureVideoFragment : Fragment() {
     }
 
 
-    private fun enableUI(enable: Boolean) {
-        arrayOf(
-            captureViewBinding.camSwitchBtn,
-            captureViewBinding.recordButton,
-            captureViewBinding.stopButton,
-            captureViewBinding.qualitySelection,
-            captureViewBinding.switchToPhotoBtn,
-            captureViewBinding.galleryBtn
-        ).forEach {
-            it.isEnabled = enable
-        }
-        if (cameraCapabilities.size <= 1) {
-            captureViewBinding.camSwitchBtn.isEnabled = false
-        }
-        if (cameraCapabilities[cameraIndex].qualities.size <= 1) {
-            captureViewBinding.qualitySelection.apply { isEnabled = false }
-        }
-    }
-
-
     private fun showUI(state: UiState) {
-        captureViewBinding.let {
+        binding.let {
             when (state) {
                 UiState.IDLE -> {
                     it.recordButton.setImageResource(R.drawable.ic_start)
@@ -369,7 +475,6 @@ class CaptureVideoFragment : Fragment() {
                     it.switchToPhotoBtn.visibility = View.INVISIBLE
                     it.galleryBtn.visibility = View.INVISIBLE
 
-
                     it.recordButton.setImageResource(R.drawable.ic_pause)
                     it.recordButton.isEnabled = true
                     it.stopButton.visibility = View.VISIBLE
@@ -380,7 +485,6 @@ class CaptureVideoFragment : Fragment() {
                     it.recordButton.setImageResource(R.drawable.ic_start)
                     it.stopButton.visibility = View.INVISIBLE
 
-
                     it.recordButton.setImageResource(R.drawable.ic_start)
                     it.stopButton.visibility = View.INVISIBLE
 
@@ -390,7 +494,6 @@ class CaptureVideoFragment : Fragment() {
                     it.galleryBtn.visibility = View.VISIBLE
 
                 }
-
             }
         }
     }
@@ -400,7 +503,7 @@ class CaptureVideoFragment : Fragment() {
         val selectorStrings = cameraCapabilities[cameraIndex].qualities.map {
             it.getNameString()
         }
-        captureViewBinding.qualitySelection.apply {
+        binding.qualitySelection.apply {
             layoutManager = LinearLayoutManager(
                 context, LinearLayoutManager.HORIZONTAL,
                 false
@@ -417,7 +520,7 @@ class CaptureVideoFragment : Fragment() {
                 holderView.setOnClickListener { view ->
                     if (qualityIndex == position) return@setOnClickListener
 
-                    captureViewBinding.qualitySelection.let {
+                    binding.qualitySelection.let {
                         it.findViewHolderForAdapterPosition(qualityIndex)?.itemView?.isSelected =
                             false
                     }
@@ -426,7 +529,7 @@ class CaptureVideoFragment : Fragment() {
 
                     enableUI(false)
                     viewLifecycleOwner.lifecycleScope.launch {
-                        setupCepture()
+                        setupCapture()
                     }
                 }
             }
@@ -434,25 +537,5 @@ class CaptureVideoFragment : Fragment() {
         }
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
-    ): View {
-        _captureViewBinding = FragmentCaptureVideoBinding.inflate(inflater, container, false)
-        return captureViewBinding.root
-    }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        initCameraFragment()
-    }
-
-    override fun onDestroyView() {
-        _captureViewBinding = null
-        super.onDestroyView()
-    }
-
-    companion object {
-        const val DEFAULT_QUALITY_IDX = 0
-        val TAG: String = CaptureVideoFragment::class.java.simpleName
-    }
 }
