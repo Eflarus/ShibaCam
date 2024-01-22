@@ -12,44 +12,61 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <Button
+
+    <ImageButton
         android:id="@+id/img_capture_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:layout_margin="16dp"
-        android:text="Take a photo"
+        android:background="@drawable/ic_start"
+        android:contentDescription="@string/take_a_photo"
+        android:scaleType="fitCenter"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <Button
-        android:id="@+id/switchToVideoBtn"
-        android:layout_width="88dp"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:text="@string/switch_to_video"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/img_capture_btn"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <Button
-        android:id="@+id/switch_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:text="@string/switchCam"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        tools:ignore="ImageContrastCheck" />
 
-    <Button
-        android:id="@+id/gallery_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+
+
+    <ImageButton
+        android:id="@+id/switch_btn"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:layout_margin="16dp"
-        android:text="@string/gallery"
+        android:background="@drawable/ic_switch"
+        android:contentDescription="@string/switchCam"
+        android:scaleType="fitCenter"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/img_capture_btn"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:ignore="ImageContrastCheck" />
+
+
+
+    <ImageButton
+        android:id="@+id/switchToVideoBtn"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_margin="24dp"
+        android:background="@drawable/ic_video"
+        android:contentDescription="@string/switch_to_photo"
+        android:scaleType="fitCenter"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/gallery_btn"
+        app:layout_constraintStart_toEndOf="@+id/img_capture_btn"
+        tools:ignore="ImageContrastCheck" />
+
+    <ImageButton
+        android:id="@+id/gallery_btn"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_margin="16dp"
+        android:background="@drawable/ic_gallery"
+        android:contentDescription="@string/gallery"
+        android:scaleType="fitCenter"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/img_capture_btn" />
+        tools:ignore="ImageContrastCheck" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

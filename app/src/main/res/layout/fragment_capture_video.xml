@@ -18,17 +18,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <CheckBox
-        android:id="@+id/audio_selection"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
-        android:buttonTint="@color/white"
-        android:text="@string/audio"
-        android:textColor="@color/white"
-        android:textSize="20sp"
-        app:layout_constraintStart_toStartOf="@id/previewView"
-        app:layout_constraintTop_toBottomOf="@id/horizontal_guideline" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/vertical_guideline"
@@ -40,88 +29,93 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/quality_selection"
         android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        android:layout_centerVertical="false"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
         android:background="?android:attr/activatedBackgroundIndicator"
         android:choiceMode="singleChoice"
-        app:layout_constraintBottom_toTopOf="@id/stop_button"
-        app:layout_constraintStart_toEndOf="@+id/vertical_guideline"
-        app:layout_constraintTop_toTopOf="@id/audio_selection" />
-
-    <ImageButton
-        android:id="@+id/cam_switch_btn"
-        android:layout_width="96dp"
-        android:layout_height="96dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="13dp"
-        android:background="@drawable/ic_switch"
-        android:contentDescription="@string/camera"
-        android:scaleType="fitCenter"
-        app:layout_constraintBottom_toTopOf="@+id/capture_status"
-        app:layout_constraintEnd_toStartOf="@+id/capture_button"
-        tools:ignore="ImageContrastCheck" />
-
-    <ImageButton
-        android:id="@+id/capture_button"
-        android:layout_width="96dp"
-        android:layout_height="0dp"
-        android:background="@drawable/ic_start"
-        android:contentDescription="@string/capture"
-        android:scaleType="fitCenter"
-        android:translationX="48dp"
-        app:layout_constraintBottom_toBottomOf="@+id/cam_switch_btn"
-        app:layout_constraintEnd_toEndOf="@+id/vertical_guideline"
-        app:layout_constraintTop_toTopOf="@+id/cam_switch_btn"
-        tools:ignore="ImageContrastCheck" />
-
-    <ImageButton
-        android:id="@+id/stop_button"
-        android:layout_width="96dp"
-        android:layout_height="0dp"
-        android:layout_marginStart="16dp"
-        android:background="@drawable/ic_stop"
-        android:contentDescription="@string/stop"
-        android:scaleType="fitCenter"
-        android:translationX="48dp"
-        android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="@+id/capture_button"
-        app:layout_constraintStart_toEndOf="@+id/capture_button"
-        app:layout_constraintTop_toTopOf="@+id/capture_button"
-        tools:ignore="ImageContrastCheck" />
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/switchToPhotoBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:text="@string/switch_to_photo"
-        app:layout_constraintBottom_toBottomOf="@+id/cam_switch_btn"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/cam_switch_btn" />
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/gallery_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:text="@string/gallery"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/switchToPhotoBtn" />
+        app:layout_constraintEnd_toStartOf="@id/vertical_guideline"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/capture_status"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="47dp"
-
         android:background="@color/transparent"
         android:lines="2"
         android:maxLines="2"
         android:textColor="@color/white"
         android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@id/vertical_guideline"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageButton
+        android:id="@+id/cam_switch_btn"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_margin="16dp"
+        android:background="@drawable/ic_switch"
+        android:contentDescription="@string/camera"
+        android:scaleType="fitCenter"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/cam_switch_btn" />
+        app:layout_constraintEnd_toStartOf="@+id/record_button"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:ignore="ImageContrastCheck" />
+
+    <ImageButton
+        android:id="@+id/record_button"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:background="@drawable/ic_start"
+        android:contentDescription="@string/capture"
+        android:scaleType="fitCenter"
+        app:layout_constraintBottom_toBottomOf="@+id/cam_switch_btn"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/cam_switch_btn"
+        tools:ignore="ImageContrastCheck" />
+
+    <ImageButton
+        android:id="@+id/stop_button"
+        android:layout_width="48dp"
+        android:layout_height="45dp"
+        android:layout_margin="16dp"
+        android:background="@drawable/ic_stop"
+        android:contentDescription="@string/stop"
+        android:scaleType="fitCenter"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/record_button"
+        app:layout_constraintStart_toEndOf="@+id/record_button"
+        app:layout_constraintTop_toTopOf="@+id/record_button"
+        tools:ignore="ImageContrastCheck" />
+
+    <ImageButton
+        android:id="@+id/switchToPhotoBtn"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_margin="24dp"
+        android:background="@drawable/ic_photo"
+        android:contentDescription="@string/switch_to_photo"
+        android:scaleType="fitCenter"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/gallery_btn"
+        app:layout_constraintStart_toEndOf="@+id/record_button"
+        tools:ignore="ImageContrastCheck" />
+
+    <ImageButton
+        android:id="@+id/gallery_btn"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_margin="16dp"
+        android:background="@drawable/ic_gallery"
+        android:contentDescription="@string/gallery"
+        android:scaleType="fitCenter"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:ignore="ImageContrastCheck" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/horizontal_guideline"

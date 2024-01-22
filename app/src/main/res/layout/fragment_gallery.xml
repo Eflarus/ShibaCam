@@ -14,28 +14,40 @@
         android:background="@android:color/transparent"
         android:contentDescription="@string/back_button_alt"
         android:scaleType="fitCenter"
-        app:layout_constraintEnd_toStartOf="@id/switchToVideoBtn"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/ic_back" />
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/switchToVideoBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:text="@string/switch_to_video"
-        app:layout_constraintStart_toEndOf="@id/back_button"
-        app:layout_constraintTop_toTopOf="parent" />
 
-    <com.google.android.material.button.MaterialButton
+    <ImageButton
+        android:id="@+id/switchToVideoBtn"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_margin="24dp"
+        android:padding="4dp"
+        android:src="@drawable/ic_video"
+        android:background="@color/black"
+        android:contentDescription="@string/switch_to_photo"
+        android:scaleType="fitCenter"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/switchToPhotoBtn"
+        tools:ignore="ImageContrastCheck" />
+
+    <ImageButton
         android:id="@+id/switchToPhotoBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:text="@string/switch_to_photo"
-        app:layout_constraintStart_toEndOf="@id/switchToVideoBtn"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_margin="24dp"
+        android:padding="4dp"
+        android:src="@drawable/ic_photo"
+        android:background="@color/black"
+        android:contentDescription="@string/switch_to_photo"
+        android:scaleType="fitCenter"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:ignore="ImageContrastCheck" />
+
+
 
 
     <androidx.recyclerview.widget.RecyclerView

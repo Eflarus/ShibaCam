@@ -1,17 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:minWidth="20dp"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:padding="5dp">
+    android:layout_margin="5dp"
+    android:backgroundTint="@color/transparent"
+    app:cardCornerRadius="5dp"
+    app:cardElevation="5dp">
 
     <TextView
         android:id="@+id/qualityTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="@color/txWhite"
+        android:paddingHorizontal="4dp"
         android:background="@drawable/selector_background"
         android:textSize="20sp"/>
-</LinearLayout>
+</androidx.cardview.widget.CardView>
